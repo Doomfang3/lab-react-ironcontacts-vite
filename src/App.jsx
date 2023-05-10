@@ -1,34 +1,95 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import contactsData from "./contacts.json";
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [contacts, setCcontacts] = useState([...contactsData].splice(0, 5));
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+	const addRandomContact = () => {
+		if (contacts.length < contactsData.length) {
+			const restContacts = contactsData.filter((contactData) => {
+				let isRest = true;
+				contacts.forEach((contact) => {
+					if (contact.id === contactData.id) isRest = false;
+				});
+				return isRest;
+			});
+			const randomIndex = Math.floor(restContacts.length * Math.random());
+			const newContacts = [...contacts];
+			newContacts.unshift(restContacts[randomIndex]);
+			setCcontacts(newContacts);
+		}
+	};
+
+	const sortByPopularity = () => {
+		const newContacts = contacts.toSorted(
+			(a, b) => b.popularity - a.popularity
+		);
+		setCcontacts(newContacts);
+	};
+
+	const sortByName = () => {
+		const newContacts = contacts.toSorted((a, b) => {
+			return a.name >= b.name ? 1 : -1;
+		});
+		setCcontacts(newContacts);
+	};
+
+	const deleteContact = (id) => {
+		const index = contacts.findIndex((contact) => contact.id === id);
+		const newContacts = contacts.toSpliced(index, 1);
+		setCcontacts(newContacts);
+	};
+
+	return (
+		<div className="App">
+			<h1>IronContacts</h1>
+			<button type="button" onClick={addRandomContact}>
+				Add Random Contact
+			</button>
+			<button type="button" onClick={sortByPopularity}>
+				Sort By Popularity
+			</button>
+			<button type="button" onClick={sortByName}>
+				Sort By Name
+			</button>
+			<table>
+				<thead>
+					<tr>
+						<th>Picture</th>
+						<th>Name</th>
+						<th>Popularity</th>
+						<th>Won Oscar</th>
+						<th>Won Emmy</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{contacts.map((contact) => {
+						return (
+							<tr key={contact.id}>
+								<td>
+									<img src={contact.pictureUrl} alt="profile" />
+								</td>
+								<td>{contact.name}</td>
+								<td>{contact.popularity.toFixed(2)}</td>
+								<td>{contact.wonOscar ? "🏆" : ""}</td>
+								<td>{contact.wonEmmy ? "🏆" : ""}</td>
+								<td>
+									<button
+										type="button"
+										onClick={() => deleteContact(contact.id)}
+									>
+										Delete
+									</button>
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
+		</div>
+	);
 }
 
-export default App
+export default App;
